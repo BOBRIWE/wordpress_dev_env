@@ -1,0 +1,70 @@
+version: '3.1'
+
+volumes:
+  mysql-data:
+  wordpress-data:
+
+networks:
+  wordpress-network:
+    driver: bridge
+
+services:
+
+  wordpress:
+    build:
+      context: ./docker/wordpress
+      dockerfile: Dockerfile
+    user: root
+    container_name: wordpress
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: admin
+      WORDPRESS_DB_NAME: development
+    ports:
+      - 9997:80
+    volumes:
+      - wordpress-data:/var/www/html:rw
+      - ./src/plugins/custom-plugin:/var/www/html/wp-content/plugins/custom-plugin:rw
+    depends_on:
+      - db
+    networks:
+      - wordpress-network
+
+  wp-cli:
+    image: wordpress:cli
+    user: root
+    working_dir: /var/www/html
+    volumes:
+      - wordpress-data:/var/www/html:rw
+    depends_on:
+      - wordpress
+      - db
+    networks:
+      - wordpress-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: admin
+      WORDPRESS_DB_PASSWORD: admin
+    ports:
+      - 9996:80
+    depends_on:
+      - db
+    networks:
+      - wordpress-network
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: development
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - wordpress-network

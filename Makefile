@@ -26,17 +26,12 @@ down: ## Stop all started for development containers
 	$(docker_compose_bin) down
 
 core-install: ## Install wordpress core
-#	$(docker_bin) cp ./etc/wp-config.php "$(WORDPRESS_CONTINER_NAME):/var/www/html/wp-config.php"
 	$(docker_compose_bin) run --rm "$(WPCLI_CONTINER_NAME)" wp core install --allow-root \
 			--url=127.0.0.1:9997 \
 			--title=development \
 			--admin_user=root \
 			--admin_password=root \
 			--admin_email=root@root.com
-
-copy-wordpress-bin: ## Copy wp-admin and wp-includes
-	$(docker_bin) cp "$(WORDPRESS_CONTINER_NAME):/var/www/html/wp-admin" ./wp-bin/wp-admin
-	$(docker_bin) cp "$(WORDPRESS_CONTINER_NAME):/var/www/html/wp-includes" ./wp-bin/wp-includes
 
 clean: ## Remove images from local registry
 	-$(docker_compose_bin) down -v
@@ -51,7 +46,7 @@ plugins: ## Install wordpress plugins through wp-cli
 		https://downloads.wordpress.org/plugin/developer.1.2.6.zip \
 		https://downloads.wordpress.org/plugin/theme-check.20190801.1.zip
 
-init: up core-install plugins copy-wordpress-bin ## Make full application initialization
+init: up core-install plugins ## Make full application initialization
 
 clean: ## Remove images from local registry
 	-$(docker_compose_bin) down -v

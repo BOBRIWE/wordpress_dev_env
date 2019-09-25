@@ -2,7 +2,6 @@ version: '3.1'
 
 volumes:
   mysql-data:
-  wordpress-data:
 
 networks:
   wordpress-network:
@@ -15,7 +14,6 @@ services:
       context: ./docker/wordpress
       dockerfile: Dockerfile
     user: root
-    container_name: wordpress
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: admin
@@ -24,7 +22,7 @@ services:
     ports:
       - 9997:80
     volumes:
-      - wordpress-data:/var/www/html:rw
+      - ./wp-bin:/var/www/html
       - ./src/plugins/custom-plugin:/var/www/html/wp-content/plugins/custom-plugin:rw
     depends_on:
       - db
@@ -36,7 +34,7 @@ services:
     user: root
     working_dir: /var/www/html
     volumes:
-      - wordpress-data:/var/www/html:rw
+      - ./wp-bin:/var/www/html
     depends_on:
       - wordpress
       - db
